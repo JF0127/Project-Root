@@ -9,27 +9,27 @@
 | 独立话轮（`turn_id`） | 1,358；其中 `tier_1_strict` 902，`tier_2_relaxed` 456 |
 | 角色标注 | 2,716 条；每轮各有一条 R01 和 R02 标注，共用该轮媒体 |
 | 独立 Speaker / Session / Prompt | 19 / 14 / 50；按输入清单的 `speaker_id`、`session_id`、`prompt_id_unique` 分别去重 |
-| 媒体资产 | `cropped_turns/` 下 1,358 个话轮目录、5,432 个非空文件；总计 4,215,690,247 字节（十进制 4.215690247 GB） |
+| 媒体资产 | `dataset/turns/` 下 1,358 个话轮目录、5,432 个非空文件；总计 4,215,690,247 字节（十进制 4.215690247 GB） |
 | 版本组合 | `phase1_frozen + expression_v1.1 + scheme1_v1` |
 
 训练、验证均从 v1.1 正式表加载。两表中的 `tier` 是**话轮**分层；`high_conf_train_eligible` 是**角色记录**级准入标记，二者不可互相替代。
 
 ## 2. 目录结构与核心文件索引
 
-路径均相对于项目根目录。下表中 `P/` 指 `metadata/phase2_production/`；同名 Parquet、CSV 是同一份标注的两种格式，**不要拼接**。
+路径均相对于项目根目录。下表中 `P/` 指 `dataset/metadata/phase2_production/`；同名 Parquet、CSV 是同一份标注的两种格式，**不要拼接**。
 
 | 路径 | 格式与用途 |
 |---|---|
-| `metadata/dataset_catalog.json` | JSON；权威入口，含相对路径、文件摘要、Schema、划分与加载口径 |
-| `cropped_turns/<turn_id>/` | 每轮一组媒体与元数据，组成见下表 |
-| `metadata/phase1_model_inputs_manifest.jsonl` | JSONL；每轮一行，从 `model_inputs` 获取允许使用的媒体路径与文本 |
-| `metadata/phase2_splits/scheme1_v1/` | `turns.csv` 是固定成员表；`split_manifest.json` 记录划分约束，`prompt_repeats.csv` 记录 Prompt 复用情况 |
+| `dataset/metadata/dataset_catalog.json` | JSON；权威入口，含相对路径、文件摘要、Schema、划分与加载口径 |
+| `dataset/turns/<turn_id>/` | 每轮一组媒体与元数据，组成见下表 |
+| `dataset/metadata/phase1_model_inputs_manifest.jsonl` | JSONL；每轮一行，从 `model_inputs` 获取允许使用的媒体路径与文本 |
+| `dataset/metadata/phase2_splits/scheme1_v1/` | `turns.csv` 是固定成员表；`split_manifest.json` 记录划分约束，`prompt_repeats.csv` 记录 Prompt 复用情况 |
 | `P/train_1000_annotations.parquet`、`P/train_1000_annotations.csv` | Train 正式角色标注；推荐 Parquet 以保留列表与布尔类型 |
 | `P/val_192_annotations.parquet`、`P/val_192_annotations.csv` | Val 正式角色标注；保留全量用于对照 |
 | `P/test_166_annotations_sealed.parquet`、`P/test_166_annotations_sealed.csv` | Test 封存标注；仅限最终评估，摘要见第 4 节 |
 | `P/stage_a_audio_notes_checkpoint.jsonl` | JSONL；按话轮关联的结构化听觉笔记 |
 | `P/expression_v1_1_frozen_spec.json`、`P/train_val_production_report.json` | JSON；分别为冻结标签与证据规范、Train/Val 正式统计 |
-| `metadata/phase2_pilot/` | v1.0 对照基线：`pilot80_annotations.parquet`、`pilot80_annotations.csv`、`pilot80_analysis_report.json`；不并入 v1.1 训练表 |
+| `dataset/metadata/phase2_pilot/` | v1.0 对照基线：`pilot80_annotations.parquet`、`pilot80_annotations.csv`、`pilot80_analysis_report.json`；不并入 v1.1 训练表 |
 
 | 单轮文件 | 含义与用法 |
 |---|---|
@@ -38,7 +38,7 @@
 | `listener_B_ref.mp4` | 听者参考画面，仅限离线参考，不是输入也不是监督标签 |
 | `meta.json` | 话轮元数据与审核信息；不能整份传入模型 |
 
-**音画同步：**按同一 `turn_id` 配对视频和独立 WAV。交付话轮的视频轨局部起点为 0；说话者视频轨与 WAV 的时长绝对差最大约 32.67 ms，不应假定两者时长逐样点相等。该值按总档案索引的 `metadata/phase1_final_candidates.parquet` 中 strict + relaxed 话轮核对。第 3 节的 16 kHz 是标注阶段的解码规格，不是对磁盘源文件采样率的描述。
+**音画同步：**按同一 `turn_id` 配对视频和独立 WAV。交付话轮的视频轨局部起点为 0；说话者视频轨与 WAV 的时长绝对差最大约 32.67 ms，不应假定两者时长逐样点相等。该值按总档案索引的 `dataset/metadata/phase1_final_candidates.parquet` 中 strict + relaxed 话轮核对。第 3 节的 16 kHz 是标注阶段的解码规格，不是对磁盘源文件采样率的描述。
 
 ## 3. 标签体系与双角色条件（Expression v1.1）
 
@@ -127,6 +127,8 @@
 | `notes` 子字段 | `vocal_tone`, `arousal_level`, `speech_pace_and_pauses`, `irony_or_sarcasm_cue`, `audio_summary_for_annotator`: `string`；`paralinguistic_events`: `list<item: string>` | 可供 Stage B 使用的语气、唤醒水平、节奏停顿、副语言事件及摘要 |
 | `notes` 子字段 | `audio_audible`: `bool`；`rough_heard_words`: `string` | 可闻性检查与盲听辅助记录；均不在 Stage B 的笔记输入白名单内 |
 
+冻结的标注规范、划分和生产审计记录按原字节保留。它们内部的 `metadata/` 路径以 `dataset/` 为基准；历史摘要针对迁移前的白名单。总档案同时记录了新旧白名单摘要，仅两项说话者媒体路径的前缀改变。
+
 ## 6. 快速加载指南
 
 从项目根目录运行。示例从总档案解析路径，只打开 Train、Val 和输入白名单；保留全量 Val 以便对照。`pandas` 使用项目环境中的 Parquet 读取引擎。
@@ -137,7 +139,7 @@ from pathlib import Path
 import pandas as pd
 
 root = Path.cwd()
-catalog = json.loads((root / 'metadata/dataset_catalog.json').read_text(encoding='utf-8'))
+catalog = json.loads((root / 'dataset/metadata/dataset_catalog.json').read_text(encoding='utf-8'))
 rules = catalog['usage_rules_and_limitations']
 train = pd.read_parquet(root / rules['training']['path'])
 train = train.loc[train['high_conf_train_eligible']].copy()
@@ -171,5 +173,5 @@ train, val = attach_inputs(train), attach_inputs(val)
 
 - **输入与划分边界：**严禁输入 `listener_B_ref.mp4`、第一阶段 L3 审核字段、`prev_other_*` 或另一角色的输出。不要重做逐行随机划分，也不要将同一 `turn_id` 的两个角色拆到不同集合。
 - **Test 纪律：**开发、调参、选择 Prompt 或制定质量规则时不得读取 `test_166_annotations_sealed.*`。仅在模型和实验设计锁定后，用封存集执行唯一一次最终评估。
-- **强度监督稀缺：**全量 Train 只有 2 条 `high`，Val 为 0。V1 强度头建议做 `low` vs `medium+` 二分类（将 `medium`、`high` 映射为 `medium+`），不改原始标签；不能宣称模型已掌握三级强度预测。
+- **强度监督稀缺：**全量 Train 只有 2 条 `high`，Val 为 0。原始标注保留 `low`、`medium`、`high` 三级；`high` 样本不足以支持对该级别的单独评估。
 - **泛化边界：**`scheme1_v1` 的 Test 是当前分布下的跨说话者基准，不是全新 Prompt 基准。存在跨集 Prompt 复用与少量早期提示词诊断暴露；最终泛化能力需用独立外部数据盲测，交互得体性需辅以人类观察者评价。

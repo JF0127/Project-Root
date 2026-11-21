@@ -1,0 +1,127 @@
+{
+  "model_version": "V0.1",
+  "models": {
+    "M0_CE": {
+      "model": {
+        "modalities": [
+          "text"
+        ],
+        "conditioning": "film",
+        "audio_projection": "original"
+      },
+      "weighted_expression": false
+    },
+    "M0": {
+      "model": {
+        "modalities": [
+          "text"
+        ],
+        "conditioning": "film",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "M1": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio"
+        ],
+        "conditioning": "film",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "M2": {
+      "model": {
+        "modalities": [
+          "text",
+          "video"
+        ],
+        "conditioning": "film",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "M3": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio",
+          "video"
+        ],
+        "conditioning": "film",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "M3_concat": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio",
+          "video"
+        ],
+        "conditioning": "concat",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "M3_no_role": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio",
+          "video"
+        ],
+        "conditioning": "none",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    }
+  },
+  "training": {
+    "epochs": 80,
+    "patience": 15,
+    "selection": "macro_f1",
+    "window": 1
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "comparisons": [
+    [
+      "M0",
+      "M0_CE"
+    ],
+    [
+      "M1",
+      "M0"
+    ],
+    [
+      "M2",
+      "M0"
+    ],
+    [
+      "M3",
+      "M0"
+    ],
+    [
+      "M3",
+      "M3_no_role"
+    ],
+    [
+      "M3",
+      "M3_concat"
+    ]
+  ],
+  "bootstrap_metrics": [
+    "expression.macro_f1",
+    "paired.disagreement.accuracy",
+    "non_neutral_intensity.macro_f1"
+  ]
+}

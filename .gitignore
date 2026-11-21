@@ -11,5 +11,10 @@ wheels/
 .env
 
 # Local dataset files
-/cropped_turns/
-/metadata/
+/dataset/*
+!/dataset/DATASET.md
+/models/
+
+/experiments/feature_diagnostics/roi_benchmark/*.npz
+.ruff_cache/
+/experiments/**/swanlog/

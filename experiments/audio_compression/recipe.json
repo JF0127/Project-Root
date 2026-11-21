@@ -1,0 +1,88 @@
+{
+  "model_version": "V0.2",
+  "models": {
+    "B0": {
+      "model": {
+        "modalities": [
+          "text"
+        ],
+        "conditioning": "concat",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "B1": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio"
+        ],
+        "conditioning": "concat",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "B2": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio",
+          "video"
+        ],
+        "conditioning": "concat",
+        "audio_projection": "original"
+      },
+      "weighted_expression": true
+    },
+    "B3": {
+      "model": {
+        "modalities": [
+          "text",
+          "audio",
+          "video"
+        ],
+        "conditioning": "concat",
+        "audio_projection": "shared"
+      },
+      "weighted_expression": true
+    }
+  },
+  "training": {
+    "epochs": 50,
+    "patience": 8,
+    "selection": "smoothed_weighted_loss",
+    "window": 3
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "comparisons": [
+    [
+      "B1",
+      "B0"
+    ],
+    [
+      "B2",
+      "B0"
+    ],
+    [
+      "B3",
+      "B2"
+    ],
+    [
+      "B3",
+      "B0"
+    ]
+  ],
+  "bootstrap_metrics": [
+    "expression.macro_f1",
+    "expression.macro_f1_excl_E05",
+    "non_neutral_intensity.macro_f1",
+    "paired.disagreement.accuracy",
+    "end_to_end.joint_exact_acc"
+  ]
+}

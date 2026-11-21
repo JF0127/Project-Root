@@ -1,0 +1,25 @@
+{
+  "study": "audio_compression",
+  "run": null,
+  "device": "auto",
+  "swanlab_mode": "online",
+  "model_artifact": false,
+  "model_version": "V0.2",
+  "models": {
+    "B0": {
+      "model": {"modalities": ["text"], "conditioning": "concat"},
+      "weighted_expression": true
+    }
+  },
+  "seeds": [42],
+  "training": {
+    "epochs": 1,
+    "patience": 8,
+    "selection": "smoothed_weighted_loss",
+    "window": 3,
+    "batch_turns": 32,
+    "lr": 0.001
+  },
+  "comparisons": [],
+  "bootstrap_metrics": ["expression.macro_f1"]
+}
